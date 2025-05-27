@@ -57,7 +57,7 @@ export class CardService {
 
     async updateCardId(cardNumber : string,newId : string){
        const db = doc(firestoredb,"myBank/cards/all/" + cardNumber)
-        await updateDoc(db,{cardId : newId})
+        await updateDoc(db,{cardId : {id : newId}})
     } 
     async simSwap(card : Card,user : User,onSuccess : ()=> void, onFailure : (reason : string) => void){
         try {
