@@ -107,7 +107,7 @@ export class CardService {
   onError: () => void
 ): Promise<void> {
   try {
-    const myDb = collection(firestoredb, `myBank/fraud/reports/${phoneNumber}/all`);
+    const myDb = collection(firestoredb, `myBank/fraud/reported/${phoneNumber}/all`);
     const docs = await getDocs(myDb);
     const reports = docs.docs.map(doc => doc.data() as Report);
     onSuccess(reports);
