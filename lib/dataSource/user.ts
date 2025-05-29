@@ -1,4 +1,4 @@
-import { doc, DocumentData, DocumentReference, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, DocumentData, DocumentReference, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { firestoredb } from "../firebasse/firebase";
 
 type Card = {
@@ -7,6 +7,32 @@ type Card = {
     cardId : CardId
 
 }
+
+
+export type Transaction = {
+  type : TransactionType;
+  amount: number;
+  timestamp: Date; 
+  location : Coords;
+  recipientAccount: string;
+  deviceId: string;
+  ipAddress?: string;
+  reported? : boolean
+};
+export type TransactionType = "SEND" | "RECIEVE" | "WITHDRAW" | "PAY";
+
+export interface Report{
+  transation : Transaction,
+  reason : string;
+  reportedAt: string,
+  reporterPhone: string
+}
+
+export type Coords = {
+  latitude : number;
+  longitude : number;
+}
+
 
 interface CardId {
     activationDate : CustomDate;
@@ -71,13 +97,80 @@ export class CardService {
             
         } catch (error) {
             console.log(error);
-            onFailure("An Error has occurred")
-            
+            onFailure("An Error has occurred")            
         }
-
-
-
     }
+
+  async checkFraudTransaction(
+  phoneNumber: string,
+  onSuccess: (reports: Report[]) => void,
+  onError: () => void
+): Promise<void> {
+  try {
+    const myDb = collection(firestoredb, `myBank/fraud/reports/${phoneNumber}/all`);
+    const docs = await getDocs(myDb);
+    const reports = docs.docs.map(doc => doc.data() as Report);
+    onSuccess(reports);
+  } catch (error) {
+    console.error(error);
+    onError();
+  }
+}
+
+async checkFraudTransactions(
+  id: string,
+  onResult: (reports: Report[]) => void
+): Promise<void> {
+  try {
+    const fraudTransactionReports: Report[] = [];
+    const mydb = collection(firestoredb, "myBank/cards/all/");
+    const myQuery = query(mydb, where("cardHolder.nationIdNumber", "==", id));
+    const querySnapshot = await getDocs(myQuery);
+    const cards = querySnapshot.docs.map(doc => doc.data() as Card);
+
+    await Promise.all(
+      cards.map(card =>
+        new Promise<void>((resolve) => {
+          this.checkFraudTransaction(
+            card.cardNumber,
+            (reports) => {
+              fraudTransactionReports.push(...reports);
+              resolve();
+            },
+            () => {
+              resolve();
+            }
+          );
+        })
+      )
+    );
+
+    onResult(fraudTransactionReports);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+
+
+
+    async isNationalIdRegisteredBefore(id : string,onIsRegistered : (count : number)=> void, onIsNotRegistered : ()=> void, onError : ()=> void){
+        try {
+          const mydb = collection(firestoredb,"myBank/cards/all/")
+          const myQuery = query(mydb,where("cardHolder.nationIdNumber","==",id))
+          const querySnapshot = await getDocs(myQuery)
+          if(querySnapshot.empty){
+            return onIsNotRegistered()
+          }
+          const count = querySnapshot.docs.length
+          onIsRegistered(count)            
+        } catch (error) {
+            console.log(error);
+            onError()           
+        }
+    }
+
 
     async getCardInfo(db : DocumentReference<DocumentData, DocumentData> ) : Promise<Card | null>{
         const data = await getDoc(db)
