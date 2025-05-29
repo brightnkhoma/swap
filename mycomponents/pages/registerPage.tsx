@@ -287,7 +287,7 @@ export default function RegisterCardPage() {
                     <Button
                       variant="link"
                       size="sm"
-                      className="h-auto p-0 text-destructive-foreground underline"
+                      className="h-auto p-0 text-destructive underline"
                       type="button"
                       onClick={() => setShowReports(true)}
                     >
