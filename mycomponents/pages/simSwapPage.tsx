@@ -167,40 +167,44 @@ export default function SimSwapPage() {
               />
             </div>
 
-            <div className="space-y-1">
-              <Label>Date of Birth</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal h-10",
-                      !formData.dateOfBirth && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.dateOfBirth ? (
-                      format(formData.dateOfBirth, "dd/MM/yyyy")
-                    ) : (
-                      <span>Select date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.dateOfBirth}
-                    onSelect={(date) => 
-                      setFormData({ ...formData, dateOfBirth: date })
-                    }
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+        <div className="space-y-1">
+            <Label>Date of Birth</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-full justify-start text-left font-normal h-10",
+                    !formData.dateOfBirth && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.dateOfBirth ? (
+                    format(formData.dateOfBirth, "dd/MM/yyyy")
+                  ) : (
+                    <span>Select date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.dateOfBirth}
+                  onSelect={(date) =>
+                    setFormData({ ...formData, dateOfBirth: date })
+                  }
+                  disabled={(date) =>
+                    date > new Date() || date < new Date("1900-01-01")
+                  }
+                  captionLayout="dropdown"
+                  fromYear={1900}
+                  toYear={new Date().getFullYear()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
 
             {error && (
               <div className="text-red-500 text-sm py-1">
